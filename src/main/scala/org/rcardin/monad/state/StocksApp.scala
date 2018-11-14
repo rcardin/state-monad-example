@@ -58,7 +58,7 @@ object StocksApp {
     (f(value), newPortfolio)
   }
 
-  def flatMap[A, B](tx: Transaction[A])(f: A => Transaction[B]: Transaction[B] = portfolio => {
+  def flatMap[A, B](tx: Transaction[A])(f: A => Transaction[B]): Transaction[B] = portfolio => {
     val (value, newPortfolio) = tx(portfolio)
     f(value)(newPortfolio)
   }
