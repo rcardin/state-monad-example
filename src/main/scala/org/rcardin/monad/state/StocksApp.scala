@@ -52,4 +52,19 @@ object StocksApp {
     val (purchased, veryNewPortfolio) = buy(to, revenue)(newPortfolio)
     ((originallyOwned, purchased), veryNewPortfolio)
   }
+
+  def map[A, B](tx: Transaction[A])(f: A => B): Transaction[B] = portfolio => {
+    val (value, newPortfolio) = tx(portfolio)
+    (f(value), newPortfolio)
+  }
+
+  def flatMap[A, B](tx: Transaction[A])(f: A => Transaction[B]: Transaction[B] = portfolio => {
+    val (value, newPortfolio) = tx(portfolio)
+    f(value)(newPortfolio)
+  }
+
+  def moveFunc(from: String, to: String): Transaction[(Double, Double)] = portfolio => {
+    val originallyOwned = portfolio(from)
+    flatMap(sell(from, originallyOwned))(revenue => map(buy(to, revenue))(purchased => (originallyOwned, purchased)))
+  }
 }
