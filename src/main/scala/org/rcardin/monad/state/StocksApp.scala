@@ -16,7 +16,6 @@ object StocksApp {
     *
     * @param name The name of the stocks to buy
     * @param amount The amount in dollars to buy
-    * @param portfolio The portfolio to use
     * @return The quantity of stocks purchased
     */
   def buy(name: String, amount: Double): Transaction[Double] = portfolio => {
@@ -31,7 +30,6 @@ object StocksApp {
     *
     * @param name The name of the stocks to sell
     * @param quantity The quantity of stocks to sell
-    * @param portfolio The portfolio to use
     * @return The earned amount
     */
   def sell(name: String, quantity: Double): Transaction[Double] = portfolio => {
@@ -46,7 +44,6 @@ object StocksApp {
     *
     * @param from Stocks to be sold
     * @param to Stocks to be purchased
-    * @param portfolio The portfolio to use
     * @return The quantity of stock sold and the quantity of stocks purchased
     */
   def move(from: String, to: String): Transaction[(Double, Double)] = portfolio => {
