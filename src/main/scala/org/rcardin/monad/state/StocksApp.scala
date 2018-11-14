@@ -8,6 +8,7 @@ object StocksApp {
     * A stocks portfolio, which associate a stock name to the quantity owned
     */
   type Stocks = Map[String, Double]
+  type Transaction[A] = Stocks => (A, Stocks)
 
   /**
     * Buys an amount (dollars) of the stock with given `name`. Returns the number
@@ -18,7 +19,7 @@ object StocksApp {
     * @param portfolio The portfolio to use
     * @return The quantity of stocks purchased
     */
-  def buy(name: String, amount: Double)(portfolio: Stocks): (Double, Stocks) = {
+  def buy(name: String, amount: Double): Transaction[Double] = portfolio => {
     val purchased = amount / Prices(name)
     val owned = portfolio(name)
     (purchased, portfolio + (name -> (owned + purchased)))
@@ -33,7 +34,7 @@ object StocksApp {
     * @param portfolio The portfolio to use
     * @return The earned amount
     */
-  def sell(name: String, quantity: Double)(portfolio: Stocks): (Double, Stocks) = {
+  def sell(name: String, quantity: Double): Transaction[Double] = portfolio => {
     val revenue = quantity * Prices(name)
     val owned = portfolio(name)
     (revenue, portfolio + (name -> (owned - quantity)))
@@ -48,7 +49,7 @@ object StocksApp {
     * @param portfolio The portfolio to use
     * @return The quantity of stock sold and the quantity of stocks purchased
     */
-  def move(from: String, to: String)(portfolio: Stocks): ((Double, Double), Stocks) = {
+  def move(from: String, to: String): Transaction[(Double, Double)] = portfolio => {
     val originallyOwned = portfolio(from)
     val (revenue, newPortfolio) = sell(from, originallyOwned)(portfolio)
     val (purchased, veryNewPortfolio) = buy(to, revenue)(newPortfolio)
