@@ -11,6 +11,15 @@ object StocksApp {
   type Transaction[A] = Stocks => (A, Stocks)
 
   /**
+    * Returns the quantity of stocks owned for `name`.
+    * @param name Name of the stock
+    * @return The quantity of stocks owned for `name`.
+    */
+  def get(name: String): Transaction[Double] = portfolio => {
+    (portfolio(name), portfolio)
+  }
+
+  /**
     * Buys an amount (dollars) of the stock with given `name`. Returns the number
     * of purchased stocks.
     *
@@ -53,6 +62,10 @@ object StocksApp {
     ((originallyOwned, purchased), veryNewPortfolio)
   }
 
+  def unit[A](a: A): Transaction[A] = portfolio => {
+    (a, portfolio)
+  }
+
   def map[A, B](tx: Transaction[A])(f: A => B): Transaction[B] = portfolio => {
     val (value, newPortfolio) = tx(portfolio)
     (f(value), newPortfolio)
@@ -63,8 +76,28 @@ object StocksApp {
     f(value)(newPortfolio)
   }
 
-  def moveFunc(from: String, to: String): Transaction[(Double, Double)] = portfolio => {
-    val originallyOwned = portfolio(from)
-    flatMap(sell(from, originallyOwned))(revenue => map(buy(to, revenue))(purchased => (originallyOwned, purchased)))
-  }
+  /**
+    * Uses the flatMap and the map functions to implement the same use case of the `move` function,
+    * but without passing the updated portfolio explicitly.
+    */
+  def moveFunc(from: String, to: String): Transaction[(Double, Double)] =
+    flatMap(get(from))(
+      originallyOwned => flatMap(sell(from, originallyOwned))(
+        revenue => map(buy(to, revenue))(
+          purchased => (originallyOwned, purchased)
+        )
+      )
+    )
+
+  /**
+    * Rewrites the `moveFunc` function, using the `for-yield` syntactic sugar.
+    */
+  def moveImper(from: String, to: String): Transaction[(Double, Double)] =
+    for {
+      originallyOwned <- get(from)
+      revenue <- sell(from, originallyOwned)
+      purchased <- buy(to, revenue)
+    } yield {
+      (originallyOwned, purchased)
+    }
 }
