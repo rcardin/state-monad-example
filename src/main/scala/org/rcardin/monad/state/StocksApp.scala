@@ -56,7 +56,7 @@ object StocksApp {
     * @return The quantity of stock sold and the quantity of stocks purchased
     */
   def move(from: String, to: String): Transaction[(Double, Double)] = portfolio => {
-    val originallyOwned = portfolio(from)
+    val (originallyOwned, _) = get(from)(portfolio)
     val (revenue, newPortfolio) = sell(from, originallyOwned)(portfolio)
     val (purchased, veryNewPortfolio) = buy(to, revenue)(newPortfolio)
     ((originallyOwned, purchased), veryNewPortfolio)
