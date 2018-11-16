@@ -4,11 +4,26 @@ object StocksApp {
 
   val Prices: Map[String, Double] = Map("AMZN" -> 1631.17, "GOOG" -> 1036.05, "TSLA" -> 346.00)
 
+  // Definition of the State Monad
+  type State[S, A] = S => (A, S)
+  def unit[S, A](a: A): State[S, A] = state => {
+    (a, state)
+  }
+  def map[S, A, B](sm: State[S, A])(f: A => B): State[S, B] = state => {
+    val (value, newState) = sm(state)
+    (f(value), newState)
+  }
+  def flatMap[S, A, B](sm: State[S, A])(f: A => State[S, B]): State[S, B] = state => {
+    val (value, newState) = sm(state)
+    f(value)(newState)
+  }
+  // End of definition of the State Monad
+
   /**
     * A stocks portfolio, which associate a stock name to the quantity owned
     */
   type Stocks = Map[String, Double]
-  type Transaction[A] = Stocks => (A, Stocks)
+  type Transaction[A] = State[Stocks, A]
 
   /**
     * Returns the quantity of stocks owned for `name`.
@@ -62,19 +77,19 @@ object StocksApp {
     ((originallyOwned, purchased), veryNewPortfolio)
   }
 
-  def unit[A](a: A): Transaction[A] = portfolio => {
-    (a, portfolio)
-  }
-
-  def map[A, B](tx: Transaction[A])(f: A => B): Transaction[B] = portfolio => {
-    val (value, newPortfolio) = tx(portfolio)
-    (f(value), newPortfolio)
-  }
-
-  def flatMap[A, B](tx: Transaction[A])(f: A => Transaction[B]): Transaction[B] = portfolio => {
-    val (value, newPortfolio) = tx(portfolio)
-    f(value)(newPortfolio)
-  }
+//  def unit[A](a: A): Transaction[A] = portfolio => {
+//    (a, portfolio)
+//  }
+//
+//  def map[A, B](tx: Transaction[A])(f: A => B): Transaction[B] = portfolio => {
+//    val (value, newPortfolio) = tx(portfolio)
+//    (f(value), newPortfolio)
+//  }
+//
+//  def flatMap[A, B](tx: Transaction[A])(f: A => Transaction[B]): Transaction[B] = portfolio => {
+//    val (value, newPortfolio) = tx(portfolio)
+//    f(value)(newPortfolio)
+//  }
 
   /**
     * Uses the flatMap and the map functions to implement the same use case of the `move` function,
